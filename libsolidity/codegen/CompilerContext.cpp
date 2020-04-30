@@ -132,6 +132,7 @@ void CompilerContext::callLowLevelFunction(
 
 	*this << lowLevelFunctionTag(_name, _inArgs, _outArgs, _generator);
 
+	// TODO could use jumpsub?
 	appendJump(evmasm::AssemblyItem::JumpType::IntoFunction);
 	adjustStackOffset(int(_outArgs) - 1 - _inArgs);
 	*this << retTag.tag();
