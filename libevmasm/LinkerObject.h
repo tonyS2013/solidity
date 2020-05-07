@@ -44,6 +44,9 @@ struct LinkerObject
 	/// to a list of offsets into the bytecode that refer to their values.
 	std::map<u256, std::pair<std::string, std::vector<size_t>>> immutableReferences;
 
+	/// Bytecode offsets of named tags like function entry points.
+	std::map<std::string, size_t> namedTags;
+
 	/// Appends the bytecode of @a _other and incorporates its link references.
 	void append(LinkerObject const& _other);
 

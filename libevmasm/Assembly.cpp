@@ -339,9 +339,9 @@ Json::Value Assembly::assemblyJSON(map<string, unsigned> const& _sourceIndices) 
 AssemblyItem Assembly::namedTag(string const& _name)
 {
 	assertThrow(!_name.empty(), AssemblyException, "Empty named tag.");
-	if (!m_namedTags.count(_name))
-		m_namedTags[_name] = size_t(newTag().data());
-	return AssemblyItem{Tag, m_namedTags.at(_name)};
+	if (!m_namedTags.values.count(_name))
+		m_namedTags.set(_name, size_t(newTag().data()));
+	return AssemblyItem{Tag, m_namedTags.values.at(_name)};
 }
 
 AssemblyItem Assembly::newPushLibraryAddress(string const& _identifier)
@@ -682,13 +682,22 @@ LinkerObject const& Assembly::assemble() const
 			ret.bytecode.resize(ret.bytecode.size() + 20);
 			break;
 		case Tag:
+		{
 			assertThrow(i.data() != 0, AssemblyException, "Invalid tag position.");
 			assertThrow(i.splitForeignPushTag().first == size_t(-1), AssemblyException, "Foreign tag.");
+			size_t tagId = size_t(i.data());
 			assertThrow(ret.bytecode.size() < 0xffffffffL, AssemblyException, "Tag too large.");
-			assertThrow(m_tagPositionsInBytecode[size_t(i.data())] == size_t(-1), AssemblyException, "Duplicate tag position.");
-			m_tagPositionsInBytecode[size_t(i.data())] = ret.bytecode.size();
+			assertThrow(m_tagPositionsInBytecode[tagId] == size_t(-1), AssemblyException, "Duplicate tag position.");
+			m_tagPositionsInBytecode[tagId] = ret.bytecode.size();
+			if (m_namedTags.references.count(tagId))
+			{
+				set<string> const& names = m_namedTags.references.at(tagId);
+				assertThrow(names.size() == 1, AssemblyException, "Two names for the same tag.");
+				ret.namedTags[*names.begin()] = ret.bytecode.size();
+			}
 			ret.bytecode.push_back((uint8_t)Instruction::JUMPDEST);
 			break;
+		}
 		default:
 			assertThrow(false, InvalidOpcode, "Unexpected opcode while assembling.");
 		}

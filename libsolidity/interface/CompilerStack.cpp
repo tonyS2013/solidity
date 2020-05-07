@@ -762,6 +762,38 @@ Json::Value const& CompilerStack::storageLayout(Contract const& _contract) const
 	return *_contract.storageLayout;
 }
 
+Json::Value const& CompilerStack::functionDebugData(Contract const& _contract) const
+{
+	if (m_stackState < AnalysisPerformed)
+		BOOST_THROW_EXCEPTION(CompilerError() << errinfo_comment("Analysis was not successful."));
+
+	solAssert(_contract.contract, "");
+
+	cout << "Creation:" << endl;
+	for (auto const& [name, offset]: _contract.object.namedTags)
+		cout << "Offset of " << name << ": " << offset << endl;
+	cout << "Runtime:" << endl;
+	for (auto const& [name, offset]: _contract.runtimeObject.namedTags)
+		cout << "Offset of " << name << ": " << offset << endl;
+	/*
+	 * // what about modifiers?
+	 * [
+	 * - functionName (sourceFile:ContractName.[creation].functionName)
+	 * - entryPoint: bytecode offset
+	 * - localVariables:
+	 *   - scope: [stackOffset, start, end] // relative to function entry point
+	 *   - type
+	 *   - kind: "parameter", "returnVariable"
+	 * ]
+	*/
+
+	// caches the result
+	if (!_contract.functionDebugData)
+		_contract.functionDebugData = make_unique<Json::Value>();
+
+	return *_contract.functionDebugData;
+}
+
 Json::Value const& CompilerStack::natspecUser(string const& _contractName) const
 {
 	if (m_stackState < AnalysisPerformed)

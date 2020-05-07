@@ -345,6 +345,7 @@ private:
 		mutable std::unique_ptr<std::string const> metadata; ///< The metadata json that will be hashed into the chain.
 		mutable std::unique_ptr<Json::Value const> abi;
 		mutable std::unique_ptr<Json::Value const> storageLayout;
+		mutable std::unique_ptr<Json::Value const> functionDebugData;
 		mutable std::unique_ptr<Json::Value const> userDocumentation;
 		mutable std::unique_ptr<Json::Value const> devDocumentation;
 		mutable std::unique_ptr<std::string const> sourceMapping;
@@ -408,6 +409,8 @@ private:
 	/// @returns the storage layout of the contract as a JSON object.
 	/// This will generate the JSON object and store it in the Contract object if it is not present yet.
 	Json::Value const& storageLayout(Contract const&) const;
+
+	Json::Value const& functionDebugData(Contract const&) const;
 
 	/// @returns the Natspec User documentation as a JSON object.
 	/// This will generate the JSON object and store it in the Contract object if it is not present yet.
