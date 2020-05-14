@@ -4,11 +4,10 @@ Language Features:
 
 
 Compiler Features:
+ * SMTChecker: Support to external calls to unknown code and to known view/pure functions.
 
 
 Bugfixes:
-
-
 
 
 ### 0.6.10 (2020-06-11)
