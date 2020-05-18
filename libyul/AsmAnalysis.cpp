@@ -306,11 +306,15 @@ vector<YulString> AsmAnalyzer::operator()(FunctionCall const& _funCall)
 				_funCall.functionName.name.str() == "datasize" ||
 				_funCall.functionName.name.str() == "dataoffset"
 			)
+			{
 				if (!m_dataNames.count(std::get<Literal>(arg).value))
 					typeError(
 						_funCall.functionName.location,
 						"Unknown data object \"" + std::get<Literal>(arg).value.str() + "\"."
 					);
+				else if (m_objectsByDataName.count(std::get<Literal>(arg).value))
+					m_allSubObjects.push_back(m_objectsByDataName.at(std::get<Literal>(arg).value));
+			}
 		}
 	}
 	std::reverse(argTypes.begin(), argTypes.end());
