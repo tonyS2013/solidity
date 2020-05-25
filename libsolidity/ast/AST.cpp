@@ -28,6 +28,8 @@
 #include <libsolutil/Keccak256.h>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/join.hpp>
+#include <boost/range/adaptor/transformed.hpp>
 
 #include <algorithm>
 #include <functional>
@@ -436,6 +438,21 @@ FunctionTypePointer EventDefinition::functionType(bool _internal) const
 		return TypeProvider::function(*this);
 	else
 		return nullptr;
+}
+
+string EventDefinition::signature() const
+{
+	auto typeStrings = m_parameters->parameters() |
+		boost::adaptors::transformed([&](auto variableDeclarationPointer) -> string
+	{
+		string typeName = variableDeclarationPointer->type()->toString(true);
+		if (variableDeclarationPointer->isIndexed())
+			typeName += " indexed";
+
+		return typeName;
+	});
+
+	return name() + "(" + boost::algorithm::join(typeStrings, ",") + ")";
 }
 
 EventDefinitionAnnotation& EventDefinition::annotation() const

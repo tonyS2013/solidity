@@ -1075,6 +1075,10 @@ public:
 
 	TypePointer type() const override;
 	FunctionTypePointer functionType(bool /*_internal*/) const override;
+	/// @returns the signature of the event. Note: the difference between this and
+	/// FunctionType::externalSignature() is that this will also contain the keyword "indexed" for
+	/// indexed parameters.
+	std::string signature() const;
 
 	bool isVisibleInDerivedContracts() const override { return true; }
 	bool isVisibleViaContractTypeAccess() const override { return false; /* TODO */ }
