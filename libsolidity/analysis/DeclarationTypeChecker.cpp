@@ -78,26 +78,61 @@ bool DeclarationTypeChecker::visit(StructDefinition const& _struct)
 	}
 
 	bool previousRecursiveStructSeen = m_recursiveStructSeen;
+	bool previousHasNestedMapping = m_nestedMappingSeen;
 	bool hasRecursiveChild = false;
+	bool hasNestedMapping = false;
 
 	m_currentStructsSeen.insert(&_struct);
 
 	for (auto const& member: _struct.members())
 	{
 		m_recursiveStructSeen = false;
+		m_nestedMappingSeen = false;
 		member->accept(*this);
 		solAssert(member->annotation().type, "");
 		solAssert(member->annotation().type->canBeStored(), "Type cannot be used in struct.");
+
+		if (member->type()->category() == Type::Category::Mapping)
+			hasNestedMapping = true;
+		else if (auto arrayType = dynamic_cast<ArrayType const*>(member->type()))
+		{
+			TypePointer finalBaseType = arrayType->finalBaseType(false);
+			if (finalBaseType->category() == Type::Category::Mapping)
+				hasNestedMapping = true;
+			else if (auto structType = dynamic_cast<StructType const*>(finalBaseType))
+			{
+				optional<bool> containsNestedMapping =
+					structType->structDefinition().annotation().containsNestedMapping;
+				if (containsNestedMapping.has_value() && containsNestedMapping.value())
+					hasNestedMapping = true;
+			}
+		}
+		else if (auto structType = dynamic_cast<StructType const*>(member->type()))
+		{
+			optional<bool> containsNestedMapping =
+				structType->structDefinition().annotation().containsNestedMapping;
+			if (containsNestedMapping.has_value() && containsNestedMapping.value())
+				hasNestedMapping = true;
+		}
+
 		if (m_recursiveStructSeen)
 			hasRecursiveChild = true;
+		if (m_nestedMappingSeen)
+			hasNestedMapping = true;
 	}
 
 	if (!_struct.annotation().recursive.has_value())
 		_struct.annotation().recursive = hasRecursiveChild;
+	if (!_struct.annotation().containsNestedMapping.has_value())
+		_struct.annotation().containsNestedMapping = hasNestedMapping;
 	m_recursiveStructSeen = previousRecursiveStructSeen || *_struct.annotation().recursive;
+	m_nestedMappingSeen = previousHasNestedMapping || *_struct.annotation().containsNestedMapping;
 	m_currentStructsSeen.erase(&_struct);
 	if (m_currentStructsSeen.empty())
+	{
 		m_recursiveStructSeen = false;
+		m_nestedMappingSeen = false;
+	}
 
 	// Check direct recursion, fatal error if detected.
 	auto visitor = [&](StructDefinition const& _struct, auto& _cycleDetector, size_t _depth)
@@ -112,18 +147,16 @@ bool DeclarationTypeChecker::visit(StructDefinition const& _struct)
 		for (ASTPointer<VariableDeclaration> const& member: _struct.members())
 		{
 			Type const* memberType = member->annotation().type;
-			while (auto arrayType = dynamic_cast<ArrayType const*>(memberType))
-			{
-				if (arrayType->isDynamicallySized())
-					break;
-				memberType = arrayType->baseType();
-			}
+
+			if (auto arrayType = dynamic_cast<ArrayType const*>(memberType))
+				memberType = arrayType->finalBaseType(true);
+
 			if (auto structType = dynamic_cast<StructType const*>(memberType))
 				if (_cycleDetector.run(structType->structDefinition()))
 					return;
 		}
 	};
-	if (util::CycleDetector<StructDefinition>(visitor).run(_struct) != nullptr)
+	if (util::CycleDetector<StructDefinition>(visitor).run(_struct))
 		m_errorReporter.fatalTypeError(2046_error, _struct.location(), "Recursive struct definition.");
 
 	return false;

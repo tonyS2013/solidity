@@ -63,6 +63,7 @@ private:
 	langutil::EVMVersion m_evmVersion;
 	bool m_insideFunctionType = false;
 	bool m_recursiveStructSeen = false;
+	bool m_nestedMappingSeen = true;
 	std::set<StructDefinition const*> m_currentStructsSeen;
 };
 
