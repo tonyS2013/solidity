@@ -8,3 +8,5 @@ contract C
 		return z;
 	}
 }
+// ----
+// Warning: (116-121): Overflow (resulting value larger than 2**256 - 1) happens here

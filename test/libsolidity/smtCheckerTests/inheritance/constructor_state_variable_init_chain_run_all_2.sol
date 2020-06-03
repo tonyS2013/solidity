@@ -24,7 +24,6 @@ contract A is B {
 // ----
 // Warning: (171-177): Overflow (resulting value larger than 2**256 - 1) happens here
 // Warning: (231-236): Overflow (resulting value larger than 2**256 - 1) happens here
-// Warning: (171-177): Overflow (resulting value larger than 2**256 - 1) happens here
 // Warning: (261-266): Overflow (resulting value larger than 2**256 - 1) happens here
 // Warning: (283-289): Overflow (resulting value larger than 2**256 - 1) happens here
 // Warning: (306-311): Overflow (resulting value larger than 2**256 - 1) happens here

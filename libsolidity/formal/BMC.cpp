@@ -52,11 +52,11 @@ BMC::BMC(
 #endif
 }
 
-void BMC::analyze(SourceUnit const& _source, set<Expression const*> _safeAssertions)
+void BMC::analyze(SourceUnit const& _source, set<ASTNode const*> _solvedTargets)
 {
 	solAssert(_source.annotation().experimentalFeatures.count(ExperimentalFeature::SMTChecker), "");
 
-	m_safeAssertions += move(_safeAssertions);
+	m_solvedTargets += move(_solvedTargets);
 	m_context.setSolver(m_interface.get());
 	m_context.clear();
 	m_context.setAssertionAccumulation(true);
@@ -604,12 +604,17 @@ void BMC::checkUnderflow(BMCVerificationTarget& _target, smtutil::Expression con
 			_target.type == VerificationTarget::Type::UnderOverflow,
 		""
 	);
+
+	if (m_solvedTargets.count(_target.expression))
+		return;
+
 	IntegerType const* intType = nullptr;
 	if (auto const* type = dynamic_cast<IntegerType const*>(_target.expression->annotation().type))
 		intType = type;
 	else
 		intType = TypeProvider::uint256();
 	solAssert(intType, "");
+
 	checkCondition(
 		_target.constraints && _constraints && _target.value < smt::minValue(*intType),
 		_target.callStack,
@@ -630,13 +635,17 @@ void BMC::checkOverflow(BMCVerificationTarget& _target, smtutil::Expression cons
 			_target.type == VerificationTarget::Type::UnderOverflow,
 		""
 	);
+
+	if (m_solvedTargets.count(_target.expression))
+		return;
+
 	IntegerType const* intType = nullptr;
 	if (auto const* type = dynamic_cast<IntegerType const*>(_target.expression->annotation().type))
 		intType = type;
 	else
 		intType = TypeProvider::uint256();
-
 	solAssert(intType, "");
+
 	checkCondition(
 		_target.constraints && _constraints && _target.value > smt::maxValue(*intType),
 		_target.callStack,
@@ -684,7 +693,7 @@ void BMC::checkBalance(BMCVerificationTarget& _target)
 void BMC::checkAssert(BMCVerificationTarget& _target)
 {
 	solAssert(_target.type == VerificationTarget::Type::Assert, "");
-	if (!m_safeAssertions.count(_target.expression))
+	if (!m_solvedTargets.count(_target.expression))
 		checkCondition(
 			_target.constraints && !_target.value,
 			_target.callStack,

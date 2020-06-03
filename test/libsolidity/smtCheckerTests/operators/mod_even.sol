@@ -9,4 +9,5 @@ contract C
 	}
 }
 // ----
+// Warning: (113-118): Error trying to invoke SMT solver.
 // Warning: (122-142): Error trying to invoke SMT solver.

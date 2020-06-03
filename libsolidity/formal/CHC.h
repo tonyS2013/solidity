@@ -54,7 +54,8 @@ public:
 
 	void analyze(SourceUnit const& _sources);
 
-	std::set<Expression const*> const& safeAssertions() const { return m_safeAssertions; }
+	std::set<ASTNode const*> const& safeTargets() const { return m_safeTargets; }
+	std::set<ASTNode const*> const& unsafeTargets() const { return m_unsafeTargets; }
 
 	/// This is used if the Horn solver is not directly linked into this binary.
 	/// @returns a list of inputs to the Horn solver that were not part of the argument to
@@ -79,6 +80,15 @@ private:
 	void internalFunctionCall(FunctionCall const& _funCall);
 	void unknownFunctionCall(FunctionCall const& _funCall);
 	void makeArrayPopVerificationTarget(FunctionCall const& _arrayPop) override;
+	/// Creates underflow/overflow verification targets.
+	std::pair<smtutil::Expression, smtutil::Expression> arithmeticOperation(
+		Token _op,
+		smtutil::Expression const& _left,
+		smtutil::Expression const& _right,
+		TypePointer const& _commonType,
+		Expression const& _expression
+	) override;
+
 	//@}
 
 	struct IdCompare
@@ -184,8 +194,8 @@ private:
 	std::pair<smtutil::CheckResult, std::vector<std::string>> query(smtutil::Expression const& _query, langutil::SourceLocation const& _location);
 
 	void addVerificationTarget(ASTNode const* _scope, VerificationTarget::Type _type, smtutil::Expression _from, smtutil::Expression _constraints, smtutil::Expression _errorId);
+	void addVerificationTarget(VerificationTarget::Type _type, ASTNode const* _scope, smtutil::Expression _errorId);
 	void addAssertVerificationTarget(ASTNode const* _scope, smtutil::Expression _from, smtutil::Expression _constraints, smtutil::Expression _errorId);
-	void addArrayPopVerificationTarget(ASTNode const* _scope, smtutil::Expression _errorId);
 	//@}
 
 	/// Misc.
@@ -246,8 +256,8 @@ private:
 
 	std::map<ASTNode const*, CHCVerificationTarget, IdCompare> m_verificationTargets;
 
-	/// Assertions proven safe.
-	std::set<Expression const*> m_safeAssertions;
+	/// Targets proven safe.
+	std::set<ASTNode const*> m_safeTargets;
 	/// Targets proven unsafe.
 	std::set<ASTNode const*> m_unsafeTargets;
 	//@}
