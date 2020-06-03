@@ -4,6 +4,7 @@ Language Features:
 
 
 Compiler Features:
+ * Commandline Interface: Prevent some incompatible commandline options from being used together.
 
 
 Bugfixes:
