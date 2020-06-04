@@ -4,6 +4,7 @@ Language Features:
 
 
 Compiler Features:
+ * Optimizer: Add rule to optimize byte-after-shift-left to masking only.
 
 
 Bugfixes:

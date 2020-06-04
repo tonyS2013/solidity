@@ -571,6 +571,13 @@ std::vector<SimplificationRule<Pattern>> simplificationRuleListPart7(
 		feasibilityFunction
 	});
 
+	rules.push_back({
+		Builtins::BYTE(A, Builtins::SHL(B, X)),
+		[=]() -> Pattern { return Builtins::AND(X, 0xff); },
+		false,
+		[=]() { return A.d() < 32 && B.d() == 256 - 8 * (A.d() + 1); }
+	});
+
 	return rules;
 }
 
