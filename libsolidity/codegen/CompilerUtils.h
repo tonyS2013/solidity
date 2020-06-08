@@ -110,7 +110,7 @@ public:
 	/// are always padded (except for byte arrays), regardless of this parameter.
 	/// Stack pre: memory_offset value...
 	/// Stack post: (memory_offset+length)
-	void storeInMemoryDynamic(Type const& _type, bool _padToWords = true);
+	void storeInMemoryDynamic(Type const& _type, bool _padToWords = true, bool _cleanup = true);
 
 	/// Creates code that unpacks the arguments according to their types specified by a vector of TypePointers.
 	/// From memory if @a _fromMemory is true, otherwise from call data.
@@ -309,7 +309,7 @@ private:
 	void cleanHigherOrderBits(IntegerType const& _typeOnStack);
 
 	/// Prepares the given type for storing in memory by shifting it if necessary.
-	unsigned prepareMemoryStore(Type const& _type, bool _padToWords);
+	unsigned prepareMemoryStore(Type const& _type, bool _padToWords, bool _cleanup = true);
 	/// Loads type from memory assuming memory offset is on stack top.
 	unsigned loadFromMemoryHelper(Type const& _type, bool _fromCalldata, bool _padToWords);
 

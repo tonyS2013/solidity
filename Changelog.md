@@ -9,6 +9,7 @@ Compiler Features:
 Bugfixes:
  * SMTChecker: Fix internal error when encoding tuples of tuples.
  * SMTChecker: Fix aliasing soundness after pushing to an array pointer.
+ * Code Generator: Avoid double cleanup when copying to memory.
 
 
 ### 0.6.9 (2020-06-04)
