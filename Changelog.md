@@ -8,6 +8,7 @@ Compiler Features:
  * Commandline Interface: Re-group help screen.
  * Output compilation error codes in standard-json and when using ``--error-codes``.
  * Yul: Raise warning for switch statements that only have a default and no other cases.
+ * NatSpec: Add fields "kind" and "version" to the JSON output.
 
 
 Bugfixes:
