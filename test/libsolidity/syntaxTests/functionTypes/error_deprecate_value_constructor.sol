@@ -1,5 +1,5 @@
 contract C {
-    constructor() payable public {}
+    constructor() payable {}
 }
 contract D {
     function createC() public returns (C) {

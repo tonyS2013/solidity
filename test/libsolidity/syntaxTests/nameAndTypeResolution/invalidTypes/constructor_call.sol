@@ -1,5 +1,5 @@
 contract C {
-    constructor(bytes32 _arg) public {
+    constructor(bytes32 _arg) {
     }
 }
 

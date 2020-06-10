@@ -2,7 +2,7 @@
 // "new A".
 contract B {
 	A a;
-	constructor() public {
+	constructor() {
 		a = new A(address(this));
 	}
 }

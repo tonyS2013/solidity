@@ -1,6 +1,6 @@
 contract C {
     // Fool parser into parsing a constructor as a function type.
-    constructor() public x;
+    constructor() x;
 }
 // ----
 // SyntaxError: (83-106): Functions without implementation cannot have modifiers.

@@ -1,7 +1,7 @@
 contract Foo {
 /* ©©©©ﾩ©©©©© 2017 */ constructor () public { "©©©©ﾩ©©©©©" ; }
 
-    function f() public pure {
+    function f() pure {
 
                         "S = π × r²";
 /* ₀₁₂₃₄⁵⁶⁷⁸⁹ */		"∑ 1/n! ≈ 2.7";                 // tabs in-between
