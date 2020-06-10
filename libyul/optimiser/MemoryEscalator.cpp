@@ -133,20 +133,35 @@ public:
 							return defaultVisit();
 						visit(*_assignment.value);
 						auto loc = _assignment.location;
-						std::vector<std::pair<YulString, YulString>> mstores;
-						VariableDeclaration tempDecl{loc, {}, {}};
-						for (auto& var: _assignment.variableNames)
-							if (m_currentFunctionMemorySlots->count(var.name))
-							{
-								uint64_t slot = m_currentFunctionMemorySlots->at(var.name);
-								var.name = m_nameDispenser.newName(var.name);
-								mstores.emplace_back(getMemoryLocation(slot), var.name);
-								tempDecl.variables.emplace_back(TypedName{loc, var.name, {}});
-							}
 						std::vector<Statement> result;
-						result.emplace_back(std::move(tempDecl));
-						result.emplace_back(std::move(_assignment));
-						appendMemoryStores(result, loc, mstores);
+						if (_assignment.variableNames.size() == 1)
+						{
+							uint64_t slot = m_currentFunctionMemorySlots->at(_assignment.variableNames.front().name);
+							result.emplace_back(ExpressionStatement{loc, FunctionCall{
+								loc,
+								Identifier{loc, "mstore"_yulstring},
+								{
+									Literal{loc, LiteralKind::Number, getMemoryLocation(slot), {}},
+									std::move(*_assignment.value)
+								}
+							}});
+						}
+						else
+						{
+							std::vector<std::pair<YulString, YulString>> mstores;
+							VariableDeclaration tempDecl{loc, {}, {}};
+							for (auto& var: _assignment.variableNames)
+								if (m_currentFunctionMemorySlots->count(var.name))
+								{
+									uint64_t slot = m_currentFunctionMemorySlots->at(var.name);
+									var.name = m_nameDispenser.newName(var.name);
+									mstores.emplace_back(getMemoryLocation(slot), var.name);
+									tempDecl.variables.emplace_back(TypedName{loc, var.name, {}});
+								}
+							result.emplace_back(std::move(tempDecl));
+							result.emplace_back(std::move(_assignment));
+							appendMemoryStores(result, loc, mstores);
+						}
 						return {std::move(result)};
 					},
 					[&](VariableDeclaration& _varDecl) -> OptionalStatements
@@ -157,16 +172,31 @@ public:
 							visit(*_varDecl.value);
 						auto loc = _varDecl.location;
 						std::vector<Statement> result;
-						std::vector<std::pair<YulString, YulString>> mstores;
-						for (auto& var: _varDecl.variables)
-							if (m_currentFunctionMemorySlots->count(var.name))
-							{
-								uint64_t slot = m_currentFunctionMemorySlots->at(var.name);
-								var.name = m_nameDispenser.newName(var.name);
-								mstores.emplace_back(getMemoryLocation(slot), var.name);
-							}
-						result.emplace_back(std::move(_varDecl));
-						appendMemoryStores(result, loc, mstores);
+						if (_varDecl.variables.size() == 1)
+						{
+							uint64_t slot = m_currentFunctionMemorySlots->at(_varDecl.variables.front().name);
+							result.emplace_back(ExpressionStatement{loc, FunctionCall{
+								loc,
+								Identifier{loc, "mstore"_yulstring},
+								{
+									Literal{loc, LiteralKind::Number, getMemoryLocation(slot), {}},
+									_varDecl.value ? std::move(*_varDecl.value) : Literal{loc, LiteralKind::Number, "0"_yulstring, {}}
+								}
+							}});
+						}
+						else
+						{
+							std::vector<std::pair<YulString, YulString>> mstores;
+							for (auto& var: _varDecl.variables)
+								if (m_currentFunctionMemorySlots->count(var.name))
+								{
+									uint64_t slot = m_currentFunctionMemorySlots->at(var.name);
+									var.name = m_nameDispenser.newName(var.name);
+									mstores.emplace_back(getMemoryLocation(slot), var.name);
+								}
+							result.emplace_back(std::move(_varDecl));
+							appendMemoryStores(result, loc, mstores);
+						}
 						return {std::move(result)};
 					},
 					[&](auto&) { return defaultVisit(); }

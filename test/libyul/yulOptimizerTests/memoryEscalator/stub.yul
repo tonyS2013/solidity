@@ -58,8 +58,7 @@
 //     { v := b16 }
 //     function f() -> v_1
 //     {
-//         let a1_1 := calldataload(mul(1, 4))
-//         mstore(0x80, a1_1)
+//         mstore(0x80, calldataload(mul(1, 4)))
 //         let a2 := calldataload(mul(2, 4))
 //         let a3 := calldataload(mul(3, 4))
 //         let a4 := calldataload(mul(4, 4))
@@ -68,9 +67,7 @@
 //         let a7 := calldataload(mul(7, 4))
 //         let a8 := calldataload(mul(8, 4))
 //         let a9 := calldataload(mul(9, 4))
-//         let a1_2
-//         a1_2 := calldataload(mul(0, 4))
-//         mstore(0x80, a1_2)
+//         mstore(0x80, calldataload(mul(0, 4)))
 //         let a10 := calldataload(mul(10, 4))
 //         let a11 := calldataload(mul(11, 4))
 //         let a12 := calldataload(mul(12, 4))
