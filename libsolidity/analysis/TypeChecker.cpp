@@ -420,11 +420,10 @@ bool TypeChecker::visit(FunctionDefinition const& _function)
 		if (_function.isImplemented())
 			m_errorReporter.typeError(4726_error, _function.location(), "Functions in interfaces cannot have an implementation.");
 
-		if (_function.visibility() != Visibility::External)
-			m_errorReporter.typeError(1560_error, _function.location(), "Functions in interfaces must be declared external.");
-
 		if (_function.isConstructor())
 			m_errorReporter.typeError(6482_error, _function.location(), "Constructor cannot be defined in interfaces.");
+		else if (_function.visibility() != Visibility::External)
+			m_errorReporter.typeError(1560_error, _function.location(), "Functions in interfaces must be declared external.");
 	}
 	else if (m_currentContract->contractKind() == ContractKind::Library)
 		if (_function.isConstructor())
@@ -1892,8 +1891,6 @@ void TypeChecker::typeCheckConstructor(FunctionDefinition const& _function)
 			stateMutabilityToString(_function.stateMutability()) +
 			"\"."
 		);
-	if (_function.visibility() != Visibility::Public && _function.visibility() != Visibility::Internal)
-		m_errorReporter.typeError(9239_error, _function.location(), "Constructor must be public or internal.");
 }
 
 void TypeChecker::typeCheckABIEncodeFunctions(
@@ -2505,8 +2502,6 @@ void TypeChecker::endVisit(NewExpression const& _newExpression)
 			m_errorReporter.fatalTypeError(5540_error, _newExpression.location(), "Identifier is not a contract.");
 		if (contract->isInterface())
 			m_errorReporter.fatalTypeError(2971_error, _newExpression.location(), "Cannot instantiate an interface.");
-		if (!contract->constructorIsPublic())
-			m_errorReporter.typeError(9054_error, _newExpression.location(), "Contract with internal constructor cannot be created directly.");
 		if (contract->abstract())
 			m_errorReporter.typeError(4614_error, _newExpression.location(), "Cannot instantiate an abstract contract.");
 
