@@ -6,8 +6,8 @@
     function i() { let z := mload(0) }
 }
 // ----
-// : movable, sideEffectFree, sideEffectFreeIfNoMSize
-// a: movable, sideEffectFree, sideEffectFreeIfNoMSize
+// : movable, movableIfStorageInvariant, sideEffectFree, sideEffectFreeIfNoMSize
+// a: movable, movableIfStorageInvariant, sideEffectFree, sideEffectFreeIfNoMSize
 // f: invalidatesMemory
 // g: invalidatesStorage
 // h: sideEffectFree, sideEffectFreeIfNoMSize

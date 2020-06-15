@@ -8,6 +8,7 @@ Language Features:
 Compiler Features:
  * Yul: Raise warning for switch statements that only have a default and no other cases.
  * Output compilation error codes.
+ * Yul Optimizer: LoopInvariantCodeMotion can move ``EXTCODEHASH``, ``EXTCODESIZE`` and ``SLOAD`` if the loop does not invalidates the storage.
 
 Bugfixes:
  * SMTChecker: Fix internal error when encoding tuples of tuples.

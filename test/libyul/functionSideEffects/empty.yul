@@ -1,4 +1,4 @@
 {
 }
 // ----
-// : movable, sideEffectFree, sideEffectFreeIfNoMSize
+// : movable, movableIfStorageInvariant, sideEffectFree, sideEffectFreeIfNoMSize
