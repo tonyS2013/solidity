@@ -56,7 +56,8 @@ void LoopInvariantCodeMotion::operator()(Block& _block)
 
 bool LoopInvariantCodeMotion::canBePromoted(
 	VariableDeclaration const& _varDecl,
-	set<YulString> const& _varsDefinedInCurrentScope
+	set<YulString> const& _varsDefinedInCurrentScope,
+	bool storageInvariant
 ) const
 {
 	// A declaration can be promoted iff
@@ -72,8 +73,10 @@ bool LoopInvariantCodeMotion::canBePromoted(
 		for (auto const& ref: ReferencesCounter::countReferences(*_varDecl.value, ReferencesCounter::OnlyVariables))
 			if (_varsDefinedInCurrentScope.count(ref.first) || !m_ssaVariables.count(ref.first))
 				return false;
-		if (!SideEffectsCollector{m_dialect, *_varDecl.value, &m_functionSideEffects}.movable())
-			return false;
+		auto sideEffects = SideEffectsCollector{m_dialect, *_varDecl.value, &m_functionSideEffects};
+		if (!sideEffects.movable())
+			if (!(storageInvariant && sideEffects.movableIfStorageInvariant()))
+				return false;
 	}
 	return true;
 }
@@ -82,7 +85,10 @@ optional<vector<Statement>> LoopInvariantCodeMotion::rewriteLoop(ForLoop& _for)
 {
 	assertThrow(_for.pre.statements.empty(), OptimizerException, "");
 	vector<Statement> replacement;
-	for (Block* block: {&_for.post, &_for.body})
+	auto blocks = {&_for.post, &_for.body};
+	bool storageInvariant = all_of(blocks.begin(), blocks.end(), [&](Block const* block)
+		{return !SideEffectsCollector{m_dialect, *block, &m_functionSideEffects}.invalidatesStorage();});
+	for (Block* block: blocks)
 	{
 		set<YulString> varsDefinedInScope;
 		util::iterateReplacing(
@@ -92,7 +98,7 @@ optional<vector<Statement>> LoopInvariantCodeMotion::rewriteLoop(ForLoop& _for)
 				if (holds_alternative<VariableDeclaration>(_s))
 				{
 					VariableDeclaration const& varDecl = std::get<VariableDeclaration>(_s);
-					if (canBePromoted(varDecl, varsDefinedInScope))
+					if (canBePromoted(varDecl, varsDefinedInScope, storageInvariant))
 					{
 						replacement.emplace_back(std::move(_s));
 						// Do not add the variables declared here to varsDefinedInScope because we are moving them.

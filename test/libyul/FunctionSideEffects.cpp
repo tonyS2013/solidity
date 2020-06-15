@@ -48,6 +48,8 @@ string toString(SideEffects const& _sideEffects)
 	vector<string> ret;
 	if (_sideEffects.movable)
 		ret.emplace_back("movable");
+	if (_sideEffects.movableIfStorageInvariant)
+		ret.emplace_back("movableIfStorageInvariant");
 	if (_sideEffects.sideEffectFree)
 		ret.emplace_back("sideEffectFree");
 	if (_sideEffects.sideEffectFreeIfNoMSize)

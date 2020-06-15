@@ -58,6 +58,7 @@ public:
 	void operator()(FunctionCall const& _functionCall) override;
 
 	bool movable() const { return m_sideEffects.movable; }
+	bool movableIfStorageInvariant() const { return m_sideEffects.movableIfStorageInvariant; }
 	bool sideEffectFree(bool _allowMSizeModification = false) const
 	{
 		if (_allowMSizeModification)
