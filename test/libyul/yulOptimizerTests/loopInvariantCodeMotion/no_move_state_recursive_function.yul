@@ -5,7 +5,7 @@
   let b := 1
   for { let a := 1 } iszero(eq(a, 10)) { a := add(a, 1) } {
     let t := extcodesize(f())
-    let q := extcodehash(g())
+    let q := sload(g())
   }
 }
 // ----
@@ -21,6 +21,6 @@
 //     for { } iszero(eq(a, 10)) { a := add(a, 1) }
 //     {
 //         let t := extcodesize(f())
-//         let q := extcodehash(g())
+//         let q := sload(g())
 //     }
 // }
